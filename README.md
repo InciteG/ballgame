@@ -42,6 +42,10 @@ Inputs:
       team: team name 
       link: same format as scrape e.g. (https://stats.nba.com/team/1610612738)
       year: same format as scrape (20##-##) format
+ 4) injuryupdate
+ takes up-to-date injury information from http://rotoworld.com and stores it in a database.
+ 
+  No input variables
 
 3. Licensing
   
