@@ -55,23 +55,64 @@ def url_set():
         item2.pop(0)
         item2.pop()
         itemlist.append(item2[0])
-        for a in item2[1::]:
+        itemlist.append(item2[1])
+        for a in item2[2::]:
             if a.islower() or a == '6':
                 itemlist.append(a)
+                store = a
             elif a.isupper():
                 itemlist.append(" ")
                 itemlist.append(a)
+                store = a
             elif a == '7':
                 itemlist.append(" ")
                 itemlist.append(a)
+                store = a
         input = "" .join(itemlist)
         teamlist2.append(input)
+    print(teamlist2)
     cur.execute('CREATE TABLE IF NOT EXISTS [NBA URL Table](Team TEXT, Url TEXT)')
     cur.execute('DELETE FROM [NBA URL Table]')
     cur.executemany('INSERT INTO [NBA URL Table](Team, Url) VALUES (?,?)', zip(teamlist2,teamurltag))
     conn.commit()
     return
 
+def injuryupdate():
+    cur.execute('CREATE TABLE IF NOT EXISTS [Player Injury List]([Name] TEXT, [Status] TEXT, [Date] TEXT, Injury TEXT, Returns TEXT, Team TEXT)')
+    cur.execute('DELETE FROM [Player Injury List]')
+    x = requests.get('http://www.rotoworld.com/teams/injuries/nba/all/').text
+    soup = BeautifulSoup(x, 'lxml')
+    a = soup.find_all('div', class_='pb')
+    for s in a:
+        n = s.find('div', class_='player')
+        b = s.find('table')
+        u = b.find_all('tr')
+        dat = []
+        for r in u:
+            y = r.find_all('td')
+            y = [ele.text for ele in y]
+            dat.append(y)
+        for q in dat:
+            q.pop(1)
+            q.pop(1)
+        head = dat[0]
+        head.insert(6, 'Team')
+        dat.pop(0)
+        for y in dat:
+            str = y[2]
+            lst = list(str)
+            lst.pop(3)
+            lst.insert(3, ' ')
+            if len(lst) == 5:
+                lst.insert(4, '0')
+            else:
+                pass
+            str = ''.join(lst)
+            y.insert(3, str)
+            y.pop(2)
+            y.insert(6, n.text)
+        cur.executemany('INSERT INTO [Player Injury List]([Name], [Status], [Date], Injury, Returns, Team) VALUES (?,?,?,?,?,?)', (dat))
+        conn.commit()
 
 def defaultget(team, link, year):
     tag3 = ['traditional/',  'advanced/', 'players-traditional/', 'players-advanced/', 'onoffcourt-advanced/', 'boxscores/', 'boxscores-advanced/']
